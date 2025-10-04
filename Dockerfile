@@ -1,15 +1,19 @@
 ARG BUILD_FROM
 FROM mbentley/omada-controller:beta-6.0
 
-# Add bash for Home Assistant scripts
+# Add bash and requirements for Home Assistant
 RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
         bash \
         jq \
         curl \
-    && curl -sLf -o /usr/bin/bashio "https://github.com/hassio-addons/bashio/raw/master/lib/bashio.sh" \
+        git \
+    && mkdir -p /tmp/bashio \
+    && curl -L -s "https://github.com/hassio-addons/bashio/archive/master.tar.gz" | tar -xzf - --strip 1 -C /tmp/bashio \
+    && mv /tmp/bashio/lib/bashio.sh /usr/bin/bashio \
     && chmod a+x /usr/bin/bashio \
+    && rm -rf /tmp/bashio \
     && rm -rf /var/lib/apt/lists/*
 
 # Home Assistant specific labels
