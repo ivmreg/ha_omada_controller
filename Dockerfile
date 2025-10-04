@@ -1,4 +1,16 @@
-FROM mbentley/omada-controller:beta-6.0
+ARG BUILD_FROM=mbentley/omada-controller:beta-6.0
+FROM ${BUILD_FROM}
+
+# Add Home Assistant CLI
+RUN \
+    apt-get update \
+    && apt-get install -y --no-install-recommends \
+        ca-certificates \
+        jq \
+        curl \
+    && curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/latest/download/ha_linux_$(uname -m)" \
+    && chmod a+x /usr/bin/ha \
+    && rm -rf /var/lib/apt/lists/*
 
 # Home Assistant specific labels
 LABEL \
@@ -6,9 +18,8 @@ LABEL \
     io.hass.type="addon" \
     io.hass.arch="amd64|aarch64"
 
-# Copy run script for Home Assistant integration
-COPY run.sh /
-RUN chmod a+x /run.sh
+# Copy root filesystem
+COPY rootfs /
 
 WORKDIR /
-ENTRYPOINT [ "/run.sh" ]
+ENTRYPOINT ["/init"]

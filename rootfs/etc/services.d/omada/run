@@ -1,18 +1,5 @@
 #!/usr/bin/with-contenv bashio
 
-# Get config values
-DATA_DIR=$(bashio::config 'omada_data_dir')
-
-# Create required directories
-mkdir -p "${DATA_DIR}"
-mkdir -p "${DATA_DIR}/data"
-mkdir -p "${DATA_DIR}/work"
-mkdir -p "${DATA_DIR}/logs"
-mkdir -p "${DATA_DIR}/cert"
-
-# Set permissions
-chown -R omada:omada "${DATA_DIR}"
-
 # Set up logging
 bashio::log.info "Configuring Omada Controller logging..."
 LOG_LEVEL=$(bashio::config.get 'log_level')
@@ -40,6 +27,19 @@ case $LOG_LEVEL in
         export SHOW_MONGODB_LOGS=false
         ;;
 esac
+
+# Get config values
+DATA_DIR=$(bashio::config 'omada_data_dir')
+
+# Create required directories
+mkdir -p "${DATA_DIR}"
+mkdir -p "${DATA_DIR}/data"
+mkdir -p "${DATA_DIR}/work"
+mkdir -p "${DATA_DIR}/logs"
+mkdir -p "${DATA_DIR}/cert"
+
+# Set permissions
+chown -R omada:omada "${DATA_DIR}"
 
 # Set environment variables for mbentley/omada-controller
 export OMADA_DATA_DIR="${DATA_DIR}/data"
