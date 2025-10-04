@@ -32,13 +32,7 @@ esac
 DATA_DIR=$(bashio::config 'omada_data_dir')
 
 # Create required directories
-mkdir -p "${DATA_DIR}"
-mkdir -p "${DATA_DIR}/data"
-mkdir -p "${DATA_DIR}/work"
-mkdir -p "${DATA_DIR}/logs"
-mkdir -p "${DATA_DIR}/cert"
-
-# Set permissions
+mkdir -p "${DATA_DIR}/data" "${DATA_DIR}/work" "${DATA_DIR}/logs" "${DATA_DIR}/cert"
 chown -R omada:omada "${DATA_DIR}"
 
 # Set environment variables for mbentley/omada-controller
@@ -47,11 +41,15 @@ export OMADA_WORK_DIR="${DATA_DIR}/work"
 export OMADA_LOG_DIR="${DATA_DIR}/logs"
 export OMADA_CERT_DIR="${DATA_DIR}/cert"
 export SHOW_SERVER_LOGS=true
+
 # Override default ports for bridge mode
 export PORT_HTTP=8080
 export PORT_HTTPS=8443
 export PORT_PORTAL_HTTP=8880
 export PORT_PORTAL_HTTPS=8843
+
+# Ensure Omada runs in foreground so s6 can supervise it
+export OMADA_DAEMONIZE=false
 
 # Log startup information
 bashio::log.info "Starting Omada Controller with the following configuration:"
@@ -60,14 +58,5 @@ bashio::log.info "Log Directory: ${OMADA_LOG_DIR}"
 bashio::log.info "Log Level: ${OMADA_LOG_LEVEL}"
 bashio::log.info "MongoDB Logs: $([ "$SHOW_MONGODB_LOGS" = true ] && echo 'Enabled' || echo 'Disabled')"
 
-# Create a named pipe for log redirection
-PIPE="/tmp/omada_logs"
-mkfifo "$PIPE"
-
-# Start log forwarding in background
-while read -r line < "$PIPE"; do
-    bashio::log.info "$line"
-done &
-
-# Execute the original entrypoint and redirect output to the pipe
-exec /entrypoint.sh > "$PIPE" 2>&1
+# Exec Omada entrypoint directly (no background, no FIFO)
+exec /entrypoint.sh
