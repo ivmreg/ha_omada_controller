@@ -7,13 +7,6 @@ RUN \
     && apt-get install -y --no-install-recommends \
         bash \
         jq \
-        curl \
-        git \
-    && mkdir -p /tmp/bashio \
-    && curl -L -s "https://github.com/hassio-addons/bashio/archive/master.tar.gz" | tar -xzf - --strip 1 -C /tmp/bashio \
-    && mv /tmp/bashio/lib/bashio.sh /usr/bin/bashio \
-    && chmod a+x /usr/bin/bashio \
-    && rm -rf /tmp/bashio \
     && rm -rf /var/lib/apt/lists/*
 
 # Home Assistant specific labels
@@ -24,6 +17,3 @@ LABEL \
 
 # Copy root filesystem
 COPY rootfs /
-
-WORKDIR /
-ENTRYPOINT ["/init"]
