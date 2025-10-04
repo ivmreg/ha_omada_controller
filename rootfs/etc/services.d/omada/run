@@ -46,14 +46,7 @@ export OMADA_DATA_DIR="${DATA_DIR}/data"
 export OMADA_WORK_DIR="${DATA_DIR}/work"
 export OMADA_LOG_DIR="${DATA_DIR}/logs"
 export OMADA_CERT_DIR="${DATA_DIR}/cert"
-export MANAGE_HTTP_PORT=8088
-export MANAGE_HTTPS_PORT=8043
-export PORTAL_HTTP_PORT=8088
-export PORTAL_HTTPS_PORT=8043
 export SHOW_SERVER_LOGS=true
-export SSL_CERT_NAME="tls.crt"
-export SSL_KEY_NAME="tls.key"
-export TZ="$(bashio::config 'timezone' || echo 'UTC')"
 
 # Log startup information
 bashio::log.info "Starting Omada Controller with the following configuration:"
@@ -61,7 +54,6 @@ bashio::log.info "Data Directory: ${OMADA_DATA_DIR}"
 bashio::log.info "Log Directory: ${OMADA_LOG_DIR}"
 bashio::log.info "Log Level: ${OMADA_LOG_LEVEL}"
 bashio::log.info "MongoDB Logs: $([ "$SHOW_MONGODB_LOGS" = true ] && echo 'Enabled' || echo 'Disabled')"
-bashio::log.info "Timezone: ${TZ}"
 
 # Create a named pipe for log redirection
 PIPE="/tmp/omada_logs"
