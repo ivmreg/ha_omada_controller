@@ -47,6 +47,11 @@ export OMADA_WORK_DIR="${DATA_DIR}/work"
 export OMADA_LOG_DIR="${DATA_DIR}/logs"
 export OMADA_CERT_DIR="${DATA_DIR}/cert"
 export SHOW_SERVER_LOGS=true
+# Override default ports for bridge mode
+export PORT_HTTP=8080
+export PORT_HTTPS=8443
+export PORT_PORTAL_HTTP=8880
+export PORT_PORTAL_HTTPS=8843
 
 # Log startup information
 bashio::log.info "Starting Omada Controller with the following configuration:"

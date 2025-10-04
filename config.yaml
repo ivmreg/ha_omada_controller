@@ -1,5 +1,5 @@
 name: "Omada Controller"
-version: "6.0.6"
+version: "6.0.7"
 slug: "omada_controller"
 description: "TP-Link Omada Software Controller"
 url: "https://github.com/ivmreg/ha_omada_controller"
@@ -8,7 +8,13 @@ arch:
   - aarch64
 startup: application
 boot: auto
-host_network: true
+host_network: false
+ports:
+  9080/tcp: 8080     # Omada mgmt HTTP (default 8080 → remapped to 9080)
+  9443/tcp: 8443     # Omada mgmt HTTPS (default 8443 → remapped to 9443)
+  9843/tcp: 8843     # Omada portal HTTPS (default 8843 → remapped to 9843)
+  9880/tcp: 8880     # Omada portal HTTP (default 8880 → remapped to 9880)
+  27017/tcp: 27017   # MongoDB (leave as is unless you have conflicts)
 log_level: info
 map:
   - share:rw
