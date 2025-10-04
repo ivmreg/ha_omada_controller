@@ -1,5 +1,5 @@
 name: "Omada Controller"
-version: "6.0.0"
+version: "6.0.1"
 slug: "omada_controller"
 description: "TP-Link Omada Software Controller"
 url: "https://github.com/ivmreg/ha_omada_controller"
@@ -8,6 +8,7 @@ arch:
   - aarch64
 startup: application
 boot: auto
+log_level: info
 map:
   - share:rw
 ports:

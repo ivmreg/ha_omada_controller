@@ -13,6 +13,34 @@ mkdir -p "${DATA_DIR}/cert"
 # Set permissions
 chown -R omada:omada "${DATA_DIR}"
 
+# Set up logging
+bashio::log.info "Configuring Omada Controller logging..."
+LOG_LEVEL=$(bashio::config.get 'log_level')
+
+# Convert Home Assistant log level to Omada log level
+case $LOG_LEVEL in
+    debug)
+        export OMADA_LOG_LEVEL="DEBUG"
+        export SHOW_MONGODB_LOGS=true
+        ;;
+    info)
+        export OMADA_LOG_LEVEL="INFO"
+        export SHOW_MONGODB_LOGS=true
+        ;;
+    warning)
+        export OMADA_LOG_LEVEL="WARN"
+        export SHOW_MONGODB_LOGS=false
+        ;;
+    error)
+        export OMADA_LOG_LEVEL="ERROR"
+        export SHOW_MONGODB_LOGS=false
+        ;;
+    *)
+        export OMADA_LOG_LEVEL="INFO"
+        export SHOW_MONGODB_LOGS=false
+        ;;
+esac
+
 # Set environment variables for mbentley/omada-controller
 export OMADA_DATA_DIR="${DATA_DIR}/data"
 export OMADA_WORK_DIR="${DATA_DIR}/work"
@@ -23,10 +51,26 @@ export MANAGE_HTTPS_PORT=8043
 export PORTAL_HTTP_PORT=8088
 export PORTAL_HTTPS_PORT=8843
 export SHOW_SERVER_LOGS=true
-export SHOW_MONGODB_LOGS=false
 export SSL_CERT_NAME="tls.crt"
 export SSL_KEY_NAME="tls.key"
 export TZ="$(bashio::config 'timezone' || echo 'UTC')"
 
-# Execute the original entrypoint
-exec /entrypoint.sh
+# Log startup information
+bashio::log.info "Starting Omada Controller with the following configuration:"
+bashio::log.info "Data Directory: ${OMADA_DATA_DIR}"
+bashio::log.info "Log Directory: ${OMADA_LOG_DIR}"
+bashio::log.info "Log Level: ${OMADA_LOG_LEVEL}"
+bashio::log.info "MongoDB Logs: $([ "$SHOW_MONGODB_LOGS" = true ] && echo 'Enabled' || echo 'Disabled')"
+bashio::log.info "Timezone: ${TZ}"
+
+# Create a named pipe for log redirection
+PIPE="/tmp/omada_logs"
+mkfifo "$PIPE"
+
+# Start log forwarding in background
+while read -r line < "$PIPE"; do
+    bashio::log.info "$line"
+done &
+
+# Execute the original entrypoint and redirect output to the pipe
+exec /entrypoint.sh > "$PIPE" 2>&1
