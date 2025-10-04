@@ -10,11 +10,11 @@ startup: application
 boot: auto
 host_network: false
 ports:
-  9080/tcp: 8080     # Omada mgmt HTTP (default 8080 → remapped to 9080)
-  9443/tcp: 8443     # Omada mgmt HTTPS (default 8443 → remapped to 9443)
-  9843/tcp: 8843     # Omada portal HTTPS (default 8843 → remapped to 9843)
-  9880/tcp: 8880     # Omada portal HTTP (default 8880 → remapped to 9880)
-  27017/tcp: 27017   # MongoDB (leave as is unless you have conflicts)
+  8080/tcp: 9080     # Omada mgmt HTTP
+  8443/tcp: 9443     # Omada mgmt HTTPS
+  8843/tcp: 9843     # Omada portal HTTPS
+  8880/tcp: 9880     # Omada portal HTTP
+  27017/tcp: 27017   # MongoDB
 log_level: info
 map:
   - share:rw
