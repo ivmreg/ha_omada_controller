@@ -1,0 +1,34 @@
+name: "Omada Controller"
+version: "6.0.0"
+slug: "omada_controller"
+description: "TP-Link Omada Software Controller"
+url: "https://github.com/ivmreg/ha_omada_controller"
+arch:
+  - amd64
+  - aarch64
+startup: application
+boot: auto
+map:
+  - share:rw
+ports:
+  8088/tcp: 8088
+  8043/tcp: 8043
+  27001/udp: 27001
+  27002/tcp: 27002
+  29810/udp: 29810
+  29811/tcp: 29811
+  29812/tcp: 29812
+  29813/tcp: 29813
+ports_description:
+  8088/tcp: "HTTP Web Portal"
+  8043/tcp: "HTTPS Web Portal"
+  27001/udp: "Controller Discovery"
+  27002/tcp: "App Discovery"
+  29810/udp: "Device Management"
+  29811/tcp: "Device Upgrade"
+  29812/tcp: "Controller Management"
+  29813/tcp: "Controller Logging"
+schema:
+  omada_data_dir: "str?"
+options:
+  omada_data_dir: "/data/omada"
