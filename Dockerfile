@@ -1,4 +1,4 @@
-FROM mbentley/omada-controller:6
+FROM mbentley/omada-controller:beta-6.0
 
 # Home Assistant specific labels
 LABEL \
