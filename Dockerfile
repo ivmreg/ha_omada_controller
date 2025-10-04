@@ -1,15 +1,15 @@
-ARG BUILD_FROM=mbentley/omada-controller:beta-6.0
-FROM ${BUILD_FROM}
+ARG BUILD_FROM
+FROM mbentley/omada-controller:beta-6.0
 
-# Add Home Assistant CLI
+# Add bash for Home Assistant scripts
 RUN \
     apt-get update \
     && apt-get install -y --no-install-recommends \
-        ca-certificates \
+        bash \
         jq \
         curl \
-    && curl -Lso /usr/bin/ha "https://github.com/home-assistant/cli/releases/latest/download/ha_linux_$(uname -m)" \
-    && chmod a+x /usr/bin/ha \
+    && curl -sLf -o /usr/bin/bashio "https://github.com/hassio-addons/bashio/raw/master/lib/bashio.sh" \
+    && chmod a+x /usr/bin/bashio \
     && rm -rf /var/lib/apt/lists/*
 
 # Home Assistant specific labels
