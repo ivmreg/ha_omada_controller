@@ -1,48 +1,106 @@
 # Home Assistant Add-on: TP-Link Omada Controller
 
-Run the TP-Link Omada Software Controller in your Home Assistant instance.
+This repository provides a minimal Home Assistant add-on that runs the TP-Link Omada Software Controller (v6 beta) using the community image `mbentley/omada-controller:beta-6.0` as its base.
 
-## About
+This README documents how the add-on is packaged in this repository, what is persisted, which ports are used, and some troubleshooting tips for common issues (for example: port conflicts such as the 8843 error).
 
-This add-on allows you to run the TP-Link Omada Software Controller on your Home Assistant instance. The Omada Controller provides a centralized management platform for TP-Link EAP devices (Access Points), OC200/OC300 Hardware Controllers, and various other TP-Link devices.
+## What this add-on does
 
-## Installation
+- Runs the Omada Controller inside a container using the `mbentley/omada-controller` image
+- Integrates with Home Assistant add-on supervisor for configuration and persistent storage
+- Forwards the Omada Controller logs into the Home Assistant add-on logs
 
-1. Add this repository to your Home Assistant instance by clicking this button:
-   [![Open your Home Assistant instance and show the add add-on repository dialog with this repository URL pre-filled.](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fivmreg%2Fha_omada_controller)
+## Important implementation details
 
-2. Find the "TP-Link Omada Controller" add-on in the add-on store
-3. Click install
+- Base image: `mbentley/omada-controller:beta-6.0`
+- The container expects persistent controller data to be provided by Home Assistant (see `omada_data_dir` below).
+- By default this add-on uses `host_network: true` in `config.yaml` so the controller can discover devices on the LAN reliably. That means port mappings are not required in the add-on UI.
+- A small wrapper script is used to read Home Assistant add-on options and set environment variables before starting the original image entrypoint.
 
-## Configuration
+## Configuration options (add-on options)
 
-The add-on can be configured via the Home Assistant UI. The following options are available:
+Configure these in the add-on UI under "Configuration":
 
-| Option | Required | Description |
-|--------|----------|-------------|
-| `omada_data_dir` | No | The directory where Omada Controller data will be stored. Defaults to `/data/omada`. |
+- `omada_data_dir` (string, default `/data/omada`) — directory inside the add-on where controller data is stored. This path is created and owned by the Omada user at container start. Keep this set to the default unless you have a reason to change it.
+- `log_level` (string, default `info`) — controls how verbose the log forwarding is (debug/info/warning/error).
 
-## Network Ports
+Example (default):
 
-The following ports are used by the Omada Controller:
+```
+omada_data_dir: "/data/omada"
+log_level: "info"
+```
 
-- 8088/tcp: HTTP Web Portal
-- 8043/tcp: HTTPS Web Portal
-- 27001/udp: Controller Discovery
-- 27002/tcp: App Discovery
-- 29810/udp: Device Management
-- 29811/tcp: Device Upgrade
-- 29812/tcp: Controller Management
-- 29813/tcp: Controller Logging
+## Persistence
 
-## First Run
+Persistent storage is important — the controller maintains databases, certs, and configuration under the `omada_data_dir`. This add-on declares:
 
-1. After starting the add-on, wait a few minutes for the Omada Controller to initialize
-2. Access the Omada Controller web interface at:
-   - HTTP: `http://your-ha-ip:8088`
-   - HTTPS: `https://your-ha-ip:8043`
-3. Follow the initial setup wizard to configure your controller
+- `map: - share:rw` in `config.yaml` so the add-on gets a place to persist data provided by Home Assistant (`/share/<addon-slug>/` or `/data` inside the add-on runtime).
+
+The add-on will create these folders inside your configured `omada_data_dir`:
+
+- `data/` — main controller database and configuration
+- `work/` — working files
+- `logs/` — controller log files
+- `cert/` — SSL certificates
+
+Keep backups of this directory if you plan to migrate or restore the controller.
+
+## Network / Ports
+
+When `host_network: true` is enabled (recommended for discovery), the controller uses host network interfaces directly. The Omada Controller uses these ports by default:
+
+- 8088/tcp — HTTP (controller portal)
+- 8043/tcp — HTTPS (controller portal and management)
+- 27001/udp — Device discovery
+- 27002/tcp — App discovery
+- 29810/udp — Device management
+- 29811/tcp — Device upgrade
+- 29812/tcp — Controller management
+- 29813/tcp — Controller logging
+
+Note: In earlier attempts the controller tried to bind to port `8843` and failed (error: "Port 8843 is already in use"). That can happen if a previous instance or another service already occupies that port. This add-on's wrapper script sets the portal HTTPS port to `8043` to avoid the typical 8843 conflict when possible. If you still see a conflict, identify the process using that port on the host and free it (or change the port mapping on the host).
+
+## Troubleshooting — Port 8843 error
+
+If you see errors like:
+
+```
+Port 8843 is already in use in system.
+Port 8843 is already in use. Release the port and try again.
+Environment is not ok for controller running
+```
+
+Try the following:
+
+1. If you are running another Omada instance (or any service using 8843) on the same host, stop it or change its listening port.
+2. Verify host processes using the port (on the Home Assistant host):
+
+```bash
+# show what is listening on 8843 (run on your HA host)
+sudo ss -ltnp | grep 8843
+```
+
+3. If port is free on the host but container still fails, confirm the add-on is started with `host_network: true` (this add-on does that by default). If you prefer to run in bridge mode, you'll need to expose ports in the add-on UI and make sure no external service claims 8043/8088/8843 on the host.
+
+4. As a last resort, stop Home Assistant services that might be occupying the port and retry, or configure Omada to use alternate portal ports via the wrapper (advanced).
+
+## Logs
+
+The add-on forwards Omada Controller output to the Home Assistant add-on log view. Use the Supervisor -> Add-on -> Logs page to inspect startup and runtime messages. Set `log_level` to `debug` to see more verbose logs.
+
+## Upgrading
+
+This repository uses the `mbentley/omada-controller:beta-6.0` image. To move to other tags or newer Omada versions you can edit the `Dockerfile` to reference another tag (for example a stable v6 tag). Be careful to verify compatibility with the wrapper and environment variable names.
 
 ## Support
 
-If you have any issues or suggestions, please open an issue on GitHub.
+If you need help, open an issue on the repository and include:
+
+- The add-on logs (Supervisor -> Add-on -> Logs)
+- The contents of `config.yaml` (as used by the add-on)
+- Any host-level processes that might be using relevant ports
+
+---
+
+This README was generated to match the current add-on implementation: it uses `mbentley/omada-controller:beta-6.0`, host networking for discovery, persistent data under the configured `omada_data_dir`, and a small start wrapper that applies Home Assistant options before launching the original image entrypoint.

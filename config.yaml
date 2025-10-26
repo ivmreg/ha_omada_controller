@@ -1,5 +1,5 @@
 name: "Omada Controller"
-version: "6.0.8"
+version: "6.0.9"
 slug: "omada_controller"
 description: "TP-Link Omada Software Controller"
 url: "https://github.com/ivmreg/ha_omada_controller"
