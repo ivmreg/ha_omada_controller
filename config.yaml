@@ -1,5 +1,5 @@
 name: "Omada Controller"
-version: "6.0.9"
+version: "6.1.0"
 slug: "omada_controller"
 description: "TP-Link Omada Software Controller"
 url: "https://github.com/ivmreg/ha_omada_controller"
@@ -8,13 +8,18 @@ arch:
   - aarch64
 startup: application
 boot: auto
-host_network: false
 ports:
-  8080/tcp: 9080     # Omada mgmt HTTP
-  8443/tcp: 9443     # Omada mgmt HTTPS
-  8843/tcp: 9843     # Omada portal HTTPS
-  8880/tcp: 9880     # Omada portal HTTP
+  8080/tcp: 8081     # Omada mgmt HTTP
+  8443/tcp: 8444     # Omada mgmt HTTPS
+  8880/tcp: 8881     # Omada portal HTTP
+  8843/tcp: 8844     # Omada portal HTTPS
   27017/tcp: 27017   # MongoDB
+ports_description:
+  8081: "Omada Management HTTP Port"
+  8444: "Omada Management HTTPS Port"
+  8881: "Omada Portal HTTP Port"
+  8844: "Omada Portal HTTPS Port"
+  27017: "MongoDB Port"
 log_level: info
 map:
   - share:rw
