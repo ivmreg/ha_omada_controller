@@ -15,11 +15,11 @@ ports:
   8843/tcp: 8844     # Omada portal HTTPS
   27017/tcp: 27017   # MongoDB
 ports_description:
-  8081: 'Omada Management HTTP Port'
-  8444: 'Omada Management HTTPS Port'
-  8881: 'Omada Portal HTTP Port'
-  8844: 'Omada Portal HTTPS Port'
-  27017: 'MongoDB Port'
+  8081: Omada Management HTTP Port
+  8444: Omada Management HTTPS Port
+  8881: Omada Portal HTTP Port
+  8844: Omada Portal HTTPS Port
+  27017: MongoDB Port
 log_level: info
 map:
   - share:rw
