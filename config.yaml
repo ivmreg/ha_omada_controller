@@ -19,7 +19,6 @@ ports_description:
   8444: "Omada Management HTTPS Port"
   8881: "Omada Portal HTTP Port"
   8844: "Omada Portal HTTPS Port"
-  27017: "MongoDB Port"
 log_level: info
 map:
   - share:rw
